@@ -1,0 +1,30 @@
+/* Tablero usando Flexbox */
+.board {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  /* Centrar el tablero horizontalmente */
+}
+
+/* Fila del tablero usando Flexbox */
+.board-row {
+  display: flex;
+}
+
+/* Estilos para las celdas */
+.cell {
+  width: 50px;
+  /* Ancho fijo para todas las celdas */
+  height: 50px;
+  /* Altura fija para todas las celdas */
+  border: 1px solid #000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+  /* Incluye el borde en el tamaño total de la celda */
+  font-size: 14px;
+  /* Tamaño de fuente para el contenido de la celda */
+  color:#000;
+  background-color:bisque
+}

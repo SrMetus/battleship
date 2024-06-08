@@ -1,0 +1,18 @@
+/* style.css */
+
+/* Estilos generales para la aplicación */
+body, html {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    height: 100%;
+    font-family: Arial, sans-serif;
+    display: flex;
+    flex-direction: column; /* Cambiar la dirección a columna */
+    justify-content: center;
+    align-items: center;
+    background-color: #f0f0f0; /* Fondo claro para mejor visibilidad */
+  }
+  
+
+
