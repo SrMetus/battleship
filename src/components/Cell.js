@@ -1,10 +1,15 @@
 import React from 'react';
 
-const Cell = ({ value, onClick }) => {
+const Cell = ({ value, onClick, onDrop, onDragOver, orientation }) => {
   return (
-    <button className="cell" onClick={onClick}>
+    <div
+      className={`cell ${orientation === 'vertical' ? 'vertical' : 'horizontal'}`}
+      onClick={onClick}
+      onDrop={onDrop}
+      onDragOver={onDragOver}
+    >
       {value}
-    </button>
+    </div>
   );
 };
 

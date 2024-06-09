@@ -5,23 +5,27 @@ import './App.css';
 
 function App() {
   const ships = [
-    { name: 'Portaaviones' },
-    { name: 'Destructor' },
-    { name: 'Submarino' },
-    { name: 'Acorazado' }
+    { name: 'Portaaviones', size: 5 },
+    { name: 'Destructor', size: 4 },
+    { name: 'Submarino', size: 3 },
+    { name: 'Acorazado', size: 2 }
   ];
-  
+
   const [selectedShip, setSelectedShip] = useState(null);
-  
-  const handleSelectShip = (ship) => {
-    setSelectedShip(ship);
-  };
-  
+  const [orientation, setOrientation] = useState('horizontal');
   const initialBoard = Array(10).fill(Array(10).fill(null));
   const [board, setBoard] = useState(initialBoard);
 
+  const handleSelectShip = (ship) => {
+    setSelectedShip(ship);
+  };
+
   const handleCellClick = (rowIndex, colIndex) => {
     console.log(`Clicked cell at row ${rowIndex}, col ${colIndex}`);
+  };
+
+  const handleRotate = () => {
+    setOrientation(orientation === 'horizontal' ? 'vertical' : 'horizontal');
   };
 
   return (
@@ -29,10 +33,20 @@ function App() {
       <h1 className="app-title">Battleship</h1>
       <div className="content-container">
         <div className="ship-list-container">
-          <ShipList ships={ships} onSelectShip={handleSelectShip} />
+          <ShipList
+            ships={ships}
+            onSelectShip={handleSelectShip}
+            orientation={orientation}
+            onRotate={handleRotate}
+          />
         </div>
         <div className="board-container">
-          <Board board={board} onCellClick={handleCellClick} />
+          <Board
+            board={board}
+            onCellClick={handleCellClick}
+            setBoard={setBoard}
+            orientation={orientation}
+          />
         </div>
       </div>
     </div>

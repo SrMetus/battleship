@@ -2,31 +2,59 @@ import React from 'react';
 import Cell from './Cell';
 import './Board.css';
 
-const Board = ({ board, onCellClick }) => {
+const Board = ({ board, onCellClick, setBoard, orientation }) => {
   const alphabet = 'ABCDEFGHIJ'.split('');
+
+  const handleDrop = (e, rowIndex, colIndex) => {
+    e.preventDefault();
+    const ship = JSON.parse(e.dataTransfer.getData('ship'));
+    console.log(`Dropped ship: ${ship.name} at row ${rowIndex}, col ${colIndex}`);
+
+    let newBoard = board.map(row => [...row]);
+    let canPlace = true;
+
+    for (let i = 0; i < ship.size; i++) {
+      let x = rowIndex + (orientation === 'vertical' ? i : 0);
+      let y = colIndex + (orientation === 'horizontal' ? i : 0);
+      if (x >= 10 || y >= 10 || newBoard[x][y]) {
+        canPlace = false;
+        break;
+      }
+    }
+
+    if (canPlace) {
+      for (let i = 0; i < ship.size; i++) {
+        let x = rowIndex + (orientation === 'vertical' ? i : 0);
+        let y = colIndex + (orientation === 'horizontal' ? i : 0);
+        newBoard[x][y] = { ship: ship.name, color: ship.color };
+      }
+      setBoard(newBoard);
+    }
+  };
+
+  const handleDragOver = (e) => {
+    e.preventDefault();
+  };
 
   return (
     <div className="board">
-      {/* Renderizar las letras para las columnas */}
       <div className="board-row">
-        {/* Celda vacía para la esquina superior izquierda */}
-        <div className="cell"></div>
+        <div className="cell coord-cell"></div>
         {alphabet.map((letter, index) => (
-          <div key={index} className="cell">{letter}</div>
+          <div key={index} className="cell coord-cell">{letter}</div>
         ))}
       </div>
-      {/* Renderizar las celdas del tablero */}
       {board.map((row, rowIndex) => (
         <div key={rowIndex} className="board-row">
-          {/* Renderizar los números para las filas */}
-          <div className="cell">{rowIndex + 1}</div>
+          <div className="cell coord-cell">{rowIndex + 1}</div>
           {row.map((cell, colIndex) => (
-            // Agregar condición para las celdas de coordenadas
             <Cell
               key={colIndex}
-              value={cell}
-              className={rowIndex === 0 || colIndex === 0 ? "coord-cell" : "cell"}
+              value={cell ? cell.ship : null}
+              color={cell ? cell.color : null}
               onClick={() => onCellClick(rowIndex, colIndex)}
+              onDrop={(e) => handleDrop(e, rowIndex, colIndex)}
+              onDragOver={handleDragOver}
             />
           ))}
         </div>
