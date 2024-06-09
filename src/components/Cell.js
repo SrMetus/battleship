@@ -1,14 +1,14 @@
 import React from 'react';
 
-const Cell = ({ value, onClick, onDrop, onDragOver, orientation }) => {
+const Cell = ({ value, onClick, onDrop, onDragOver, orientation, color }) => {
   return (
     <div
-      className={`cell ${orientation === 'vertical' ? 'vertical' : 'horizontal'}`}
+      className={`cell ${color ? 'occupied' : ''} ${orientation === 'vertical' ? 'vertical' : 'horizontal'}`}
       onClick={onClick}
       onDrop={onDrop}
       onDragOver={onDragOver}
+      style={{ backgroundColor: color }} // Aplicar el color de fondo
     >
-      {value}
     </div>
   );
 };

@@ -51,11 +51,11 @@ const Board = ({ board, onCellClick, setBoard, orientation }) => {
             <Cell
               key={colIndex}
               value={cell ? cell.ship : null}
-              color={cell ? cell.color : null}
+              color={cell ? cell.color : null} // Agregar el color del barco
               onClick={() => onCellClick(rowIndex, colIndex)}
               onDrop={(e) => handleDrop(e, rowIndex, colIndex)}
               onDragOver={handleDragOver}
-            />
+          />
           ))}
         </div>
       ))}

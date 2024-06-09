@@ -5,10 +5,10 @@ import './App.css';
 
 function App() {
   const ships = [
-    { name: 'Portaaviones', size: 5 },
-    { name: 'Destructor', size: 4 },
-    { name: 'Submarino', size: 3 },
-    { name: 'Acorazado', size: 2 }
+    { name: 'Portaaviones', size: 5, color: 'red' },
+    { name: 'Destructor', size: 4, color: 'green' },
+    { name: 'Submarino', size: 3, color: 'blue' },
+    { name: 'Acorazado', size: 2, color: 'yellow' },
   ];
 
   const [selectedShip, setSelectedShip] = useState(null);
