@@ -1,25 +1,22 @@
-/* Tablero usando Flexbox */
 .board {
   display: flex;
   flex-direction: column;
-  align-items: center; /* Centrar el tablero horizontalmente */
+  align-items: center;
 }
 
-/* Fila del tablero usando Flexbox */
 .board-row {
   display: flex;
 }
 
-/* Estilos para las celdas */
 .cell {
-  width: 50px; /* Ancho fijo para todas las celdas */
-  height: 50px; /* Altura fija para todas las celdas */
+  width: 50px;
+  height: 50px;
   border: 1px solid #000;
   display: flex;
   justify-content: center;
   align-items: center;
-  box-sizing: border-box; /* Incluye el borde en el tamaño total de la celda */
-  font-size: 14px; /* Tamaño de fuente para el contenido de la celda */
+  box-sizing: border-box;
+  font-size: 14px;
   color: #000;
   background-color: bisque;
 }
@@ -27,12 +24,4 @@
 .coord-cell {
   background-color: lightgray;
   font-weight: bold;
-}
-
-.cell.horizontal.drag-over {
-  background-color: rgba(0, 0, 255, 0.3); /* Indicar la orientación horizontal */
-}
-
-.cell.vertical.drag-over {
-  background-color: rgba(0, 255, 0, 0.3); /* Indicar la orientación vertical */
 }

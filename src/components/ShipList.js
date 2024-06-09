@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react';
 
-const ShipList = ({ ships, onSelectShip, orientation, onRotate }) => {
+const ShipList = ({ ships, onSelectShip, orientation, onRotate, placedShips }) => {
   useEffect(() => {
     const handleKeyDown = (e) => {
       if (e.key === 'R' || e.key === 'r') {
@@ -25,9 +25,10 @@ const ShipList = ({ ships, onSelectShip, orientation, onRotate }) => {
         {ships.map((ship, index) => (
           <li key={index}>
             <button
-              draggable
+              draggable={!placedShips.some(placedShip => placedShip.name === ship.name)}
               onDragStart={(e) => handleDragStart(e, ship)}
               onClick={() => onSelectShip(ship)}
+              style={{ backgroundColor: ship.color }}
             >
               {ship.name} ({orientation})
             </button>

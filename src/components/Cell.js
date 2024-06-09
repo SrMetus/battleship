@@ -1,14 +1,16 @@
 import React from 'react';
 
-const Cell = ({ value, onClick, onDrop, onDragOver, orientation, color }) => {
+const Cell = ({ value, color, onClick, onDrop, onDragOver, onContextMenu }) => {
   return (
     <div
-      className={`cell ${color ? 'occupied' : ''} ${orientation === 'vertical' ? 'vertical' : 'horizontal'}`}
+      className="cell"
       onClick={onClick}
       onDrop={onDrop}
       onDragOver={onDragOver}
-      style={{ backgroundColor: color }} // Aplicar el color de fondo
+      onContextMenu={onContextMenu}
+      style={{ backgroundColor: color || 'bisque' }}
     >
+      {value ? null : ''}
     </div>
   );
 };

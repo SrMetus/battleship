@@ -8,13 +8,14 @@ function App() {
     { name: 'Portaaviones', size: 5, color: 'red' },
     { name: 'Destructor', size: 4, color: 'green' },
     { name: 'Submarino', size: 3, color: 'blue' },
-    { name: 'Acorazado', size: 2, color: 'yellow' },
+    { name: 'Acorazado', size: 2, color: 'yellow' }
   ];
 
   const [selectedShip, setSelectedShip] = useState(null);
   const [orientation, setOrientation] = useState('horizontal');
-  const initialBoard = Array(10).fill(Array(10).fill(null));
+  const initialBoard = Array(10).fill(null).map(() => Array(10).fill(null));
   const [board, setBoard] = useState(initialBoard);
+  const [placedShips, setPlacedShips] = useState([]);
 
   const handleSelectShip = (ship) => {
     setSelectedShip(ship);
@@ -38,6 +39,7 @@ function App() {
             onSelectShip={handleSelectShip}
             orientation={orientation}
             onRotate={handleRotate}
+            placedShips={placedShips}
           />
         </div>
         <div className="board-container">
@@ -46,6 +48,8 @@ function App() {
             onCellClick={handleCellClick}
             setBoard={setBoard}
             orientation={orientation}
+            placedShips={placedShips}
+            setPlacedShips={setPlacedShips}
           />
         </div>
       </div>
