@@ -7,7 +7,7 @@ const Cell = ({ value, color, onClick, onDrop, onDragOver, onContextMenu }) => {
       onClick={onClick}
       onDrop={onDrop}
       onDragOver={onDragOver}
-      onContextMenu={onContextMenu}
+      onContextMenu={onContextMenu} // Agregamos el evento onContextMenu
       style={{ backgroundColor: color || 'bisque' }}
     >
       {value ? null : ''}
