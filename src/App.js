@@ -22,6 +22,8 @@ function App() {
   const [orientation, setOrientation] = useState('horizontal');
   const [gameWon, setGameWon] = useState(false);
   const [gameLost, setGameLost] = useState(false);
+  const [playerTurn, setPlayerTurn] = useState(true);
+  const [gameLog, setGameLog] = useState([]);
 
   useEffect(() => {
     if (isSetupComplete) {
@@ -29,12 +31,22 @@ function App() {
     }
   }, [isSetupComplete]);
 
+  useEffect(() => {
+    if (!playerTurn && isSetupComplete && !gameWon && !gameLost) {
+      setTimeout(computerFire, 2000);
+    }
+  }, [playerTurn, isSetupComplete, gameWon, gameLost]);
+
+  const logEvent = (message) => {
+    setGameLog([...gameLog, message]);
+    console.log(message);
+  };
+
   const handleSelectShip = (ship) => {
     setSelectedShip(ship);
   };
 
   const handleCellClick = (rowIndex, colIndex) => {
-    console.log(`Celda pulsada en la fila ${rowIndex}, columna ${colIndex}`);
     if (selectedShip && canPlaceShip(playerBoard, selectedShip, rowIndex, colIndex, orientation)) {
       const newBoard = placeShip(playerBoard, selectedShip, rowIndex, colIndex, orientation);
       setPlayerBoard(newBoard);
@@ -51,7 +63,7 @@ function App() {
     if (placedShips.length === ships.length) {
       setIsSetupComplete(true);
     } else {
-      alert("Por favor coloque todos sus barcos antes de iniciar.");
+      logEvent("Por favor coloque todos sus barcos antes de iniciar.");
     }
   };
 
@@ -61,7 +73,7 @@ function App() {
 
   const handleFire = () => {
     if (!fireCoordinate || fireCoordinate.length < 2 || fireCoordinate.length > 3) {
-      alert("Cordenadas no validas. Por favor coloque las coordenadas correctamente (e.g., A1, B10).");
+      logEvent("Cordenadas no validas. Por favor coloque las coordenadas correctamente (e.g., A1, B10).");
       return;
     }
 
@@ -69,18 +81,18 @@ function App() {
     const col = fireCoordinate.charCodeAt(0) - 'A'.charCodeAt(0);
 
     if (isNaN(row) || isNaN(col) || row < 0 || row >= 10 || col < 0 || col >= 10) {
-      alert("Cordenadas no validas. Por favor coloque las coordenadas correctamente (e.g., A1, B10).");
+      logEvent("Cordenadas no validas. Por favor coloque las coordenadas correctamente (e.g., A1, B10).");
       return;
     }
 
     if (enemyBoard[row][col] !== null && enemyBoard[row][col] !== 'S') {
-      alert("Ya has disparado en esta ubicacion. Por favor elige otra ubicacion donde disparar.");
+      logEvent("Ya has disparado en esta ubicacion. Por favor elige otra ubicacion donde disparar.");
       return;
     }
 
     const newEnemyBoard = enemyBoard.map((row) => [...row]);
     if (newEnemyBoard[row][col] === 'S') {
-      alert("Hit!");
+      logEvent("Hit!");
       newEnemyBoard[row][col] = 'X';
       
       // Verificacion si algun barco enemigo es hundido
@@ -89,7 +101,7 @@ function App() {
         if (ship.coordinates.some(coord => coord.row === row && coord.col === col)) {
           ship.hits += 1;
           if (ship.hits === ship.size) {
-            alert(`Has hundido el barco ${ship.name}!`);
+            logEvent(`Has hundido el barco ${ship.name}!`);
             shipSunk = true;
           }
         }
@@ -101,13 +113,58 @@ function App() {
       const allShipsSunk = newEnemyShips.every(ship => ship.hits === ship.size);
       if (allShipsSunk) {
         setGameWon(true);
+        logEvent('Has hundido todos los barcos enemigos. Ganaste!')
       }
 
     } else {
-      alert("Miss!");
+      logEvent("Miss!");
       newEnemyBoard[row][col] = 'O';
+      setPlayerTurn(false);
+      logEvent(`Fallaste el disparo en la fila ${row}, columna ${col}`);
     }
     setEnemyBoard(newEnemyBoard);
+  };
+
+  const computerFire = () => {
+    let row, col;
+    do {
+      row = getRandomInt(10);
+      col = getRandomInt(10);
+    } while (playerBoard[row][col] !== null && playerBoard[row][col] !== 'X' && playerBoard[row][col] !== 'O');
+
+    const newPlayerBoard = playerBoard.map((row) => [...row]);
+    if (newPlayerBoard[row][col] === 'S') {
+      logEvent(`Le dispararon a uno de tus barcos`);
+      newPlayerBoard[row][col] = 'X';
+      setPlayerTurn(true);
+      
+      // Verificacion si algun barco del jugador es hundido
+      let shipSunk = false;
+      const newPlacedShips = placedShips.map(ship => {
+        if (ship.coordinates.some(coord => coord.row === row && coord.col === col)) {
+          ship.hits += 1;
+          if (ship.hits === ship.size) {
+            logEvent(`Tu barco ${ship.name} ha sido hundido!`);
+            shipSunk = true;
+          }
+        }
+        return ship;
+      });
+      setPlacedShips(newPlacedShips);
+
+      // Verificacion si todos los barcos del jugador estan hundidos
+      const allShipsSunk = newPlacedShips.every(ship => ship.hits === ship.size);
+      if (allShipsSunk) {
+        setGameLost(true);
+        logEvent('Todos tus barcos han sido hundidos. Perdiste!')
+      }
+
+    } else {
+      logEvent("No te han dado");
+      newPlayerBoard[row][col] = 'O';
+      setPlayerTurn(true);
+    }
+    setPlayerBoard(newPlayerBoard);
   };
 
   const getRandomInt = (max) => {
@@ -116,8 +173,8 @@ function App() {
 
   const canPlaceShip = (board, ship, row, col, orientation) => {
     for (let i = 0; i < ship.size; i++) {
-      let x = row + (orientation === 'vertical' ? i : 0);
-      let y = col + (orientation === 'horizontal' ? i : 0);
+      let x = row + (orientation === 'vertical' ? i : 0); 
+      let y = col + (orientation === 'vertical' ? 0 : i);
       if (x >= 10 || y >= 10 || board[x][y]) {
         return false;
       }
@@ -127,11 +184,14 @@ function App() {
 
   const placeShip = (board, ship, row, col, orientation) => {
     let newBoard = board.map(row => [...row]);
+    const shipCoordinates = [];
     for (let i = 0; i < ship.size; i++) {
       let x = row + (orientation === 'vertical' ? i : 0);
       let y = col + (orientation === 'horizontal' ? i : 0);
       newBoard[x][y] = 'S';
+      shipCoordinates.push({ row: x, col: y });
     }
+    setPlacedShips([...placedShips, { ...ship, coordinates: shipCoordinates, hits: 0 }]);
     return newBoard;
   };
 
@@ -226,3 +286,4 @@ function App() {
 }
 
 export default App;
+
