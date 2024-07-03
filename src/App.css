@@ -1,43 +1,62 @@
-/* App.css */
-.app-container {
+.App {
+  text-align: center;
+}
+
+.boards {
+  display: flex;
+  justify-content: space-around;
+  margin: 20px 0;
+}
+
+.controls {
+  margin: 20px 0;
+}
+
+.fire-controls {
+  margin: 20px 0;
+}
+
+.board {
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  min-height: 100vh;
-  padding: 20px;
-  box-sizing: border-box;
-  background-color: transparent; /* Quitamos el color de fondo */
-  color: white;
+  background-color: #87CEFA;
+  padding: 10px;
 }
 
-.content-container {
+.board-row {
   display: flex;
-  align-items: center;
 }
 
-.ship-list-container {
-  margin-right: 40px;
-}
-
-.board-container {
+.cell {
+  width: 30px;
+  height: 30px;
+  border: 1px solid #000;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-top: 20px; /* Ajustamos el margen superior */
+  cursor: pointer;
 }
 
-.app-title {
-  font-size: 3rem;
-  margin-bottom: 20px; /* Ajustamos el margen inferior */
-  color: #61dafb;
+.coord-cell {
+  width: 30px;
+  height: 30px;
+  border: 1px solid #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #ddd;
 }
 
-.ship-list ul {
-  padding: 0; /* Eliminamos el relleno del elemento de lista */
-  list-style-type: none; /* Quitamos los marcadores de lista */
+.hit {
+  background-color: #f00;
 }
 
-.ship-list li {
-  margin-bottom: 10px; /* Ajustamos el margen inferior de cada elemento de lista */
+.miss {
+  background-color: #00f;
+}
+
+.log {
+  margin: 20px;
+  text-align: left;
 }

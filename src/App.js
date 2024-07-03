@@ -5,10 +5,10 @@ import './App.css';
 
 function App() {
   const ships = [
-    { name: 'Portaaviones', size: 5, color: 'red' },
-    { name: 'Destructor', size: 4, color: 'green' },
-    { name: 'Submarino', size: 3, color: 'blue' },
-    { name: 'Acorazado', size: 2, color: 'yellow' }
+    { name: 'Portaaviones', size: 5, color: 'red', coordinates: [] },
+    { name: 'Destructor', size: 4, color: 'green', coordinates: [] },
+    { name: 'Submarino', size: 3, color: 'blue', coordinates: [] },
+    { name: 'Acorazado', size: 2, color: 'yellow', coordinates: [] }
   ];
 
   const initialBoard = Array(10).fill(null).map(() => Array(10).fill(null));
@@ -37,8 +37,21 @@ function App() {
     }
   }, [playerTurn, isSetupComplete, gameWon, gameLost]);
 
+  useEffect(() => {
+    const handleKeyPress = (event) => {
+      if (event.key === 'r' || event.key === 'R') {
+        handleRotate();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyPress);
+    return () => {
+      window.removeEventListener('keydown', handleKeyPress);
+    };
+  }, []);
+
   const logEvent = (message) => {
-    setGameLog([...gameLog, message]);
+    setGameLog((prevLog) => [...prevLog, message]);
     console.log(message);
   };
 
@@ -46,17 +59,21 @@ function App() {
     setSelectedShip(ship);
   };
 
-  const handleCellClick = (rowIndex, colIndex) => {
-    if (selectedShip && canPlaceShip(playerBoard, selectedShip, rowIndex, colIndex, orientation)) {
-      const newBoard = placeShip(playerBoard, selectedShip, rowIndex, colIndex, orientation);
-      setPlayerBoard(newBoard);
-      setPlacedShips([...placedShips, selectedShip]);
-      setSelectedShip(null);
+  const handleCellClick = (rowIndex, colIndex, isEnemyBoard) => {
+    if (!isEnemyBoard) {
+      if (selectedShip && canPlaceShip(playerBoard, selectedShip, rowIndex, colIndex, orientation)) {
+        const newBoard = placeShip(playerBoard, selectedShip, rowIndex, colIndex, orientation);
+        setPlayerBoard(newBoard);
+        setPlacedShips([...placedShips, selectedShip]);
+        setSelectedShip(null);
+      }
+    } else if (isSetupComplete && playerTurn) {
+      handleFire(rowIndex, colIndex);
     }
   };
 
   const handleRotate = () => {
-    setOrientation(orientation === 'horizontal' ? 'vertical' : 'horizontal');
+    setOrientation((prevOrientation) => (prevOrientation === 'horizontal' ? 'vertical' : 'horizontal'));
   };
 
   const handleCompleteSetup = () => {
@@ -71,37 +88,37 @@ function App() {
     setFireCoordinate(e.target.value.toUpperCase());
   };
 
-  const handleFire = () => {
-    if (!fireCoordinate || fireCoordinate.length < 2 || fireCoordinate.length > 3) {
-      logEvent("Cordenadas no validas. Por favor coloque las coordenadas correctamente (e.g., A1, B10).");
+  const handleFire = (fireCoordinate) => {
+    // Convertir la coordenada de fuego (ej. A1) a índices de matriz (ej. row = 0, col = 0)
+    const [colChar, rowStr] = fireCoordinate.toUpperCase().split('');
+    const col = colChar.charCodeAt(0) - 'A'.charCodeAt(0);
+    const row = parseInt(rowStr, 10) - 1;
+
+    // Verificar si la coordenada es válida
+    if (isNaN(row) || row < 0 || row >= 10 || isNaN(col) || col < 0 || col >= 10) {
+      logEvent("Coordenada de fuego inválida. Por favor ingrese una coordenada válida (ej. A1).");
       return;
     }
 
-    const row = parseInt(fireCoordinate.slice(1)) - 1;
-    const col = fireCoordinate.charCodeAt(0) - 'A'.charCodeAt(0);
-
-    if (isNaN(row) || isNaN(col) || row < 0 || row >= 10 || col < 0 || col >= 10) {
-      logEvent("Cordenadas no validas. Por favor coloque las coordenadas correctamente (e.g., A1, B10).");
-      return;
-    }
-
+    // Verificar si ya se ha disparado en esta ubicación
     if (enemyBoard[row][col] !== null && enemyBoard[row][col] !== 'S') {
-      logEvent("Ya has disparado en esta ubicacion. Por favor elige otra ubicacion donde disparar.");
+      logEvent("Ya has disparado en esta ubicación. Por favor elige otra.");
       return;
     }
 
-    const newEnemyBoard = enemyBoard.map((row) => [...row]);
+    const newEnemyBoard = enemyBoard.map((r) => [...r]);
     if (newEnemyBoard[row][col] === 'S') {
-      logEvent("Hit!");
+      logEvent("¡Le diste a un barco enemigo!");
       newEnemyBoard[row][col] = 'X';
-      
-      // Verificacion si algun barco enemigo es hundido
+      setEnemyBoard(newEnemyBoard);
+
+      // Lógica para verificar si un barco ha sido hundido
       let shipSunk = false;
-      const newEnemyShips = enemyShips.map(ship => {
-        if (ship.coordinates.some(coord => coord.row === row && coord.col === col)) {
+      const newEnemyShips = enemyShips.map((ship) => {
+        if (ship.coordinates.some((coord) => coord.row === row && coord.col === col)) {
           ship.hits += 1;
           if (ship.hits === ship.size) {
-            logEvent(`Has hundido el barco ${ship.name}!`);
+            logEvent(`¡Hundiste el ${ship.name}!`);
             shipSunk = true;
           }
         }
@@ -109,20 +126,16 @@ function App() {
       });
       setEnemyShips(newEnemyShips);
 
-      // Verificacion si todos los barcos del enemigo estan hundidos
-      const allShipsSunk = newEnemyShips.every(ship => ship.hits === ship.size);
-      if (allShipsSunk) {
+      if (newEnemyShips.every((ship) => ship.hits === ship.size)) {
         setGameWon(true);
-        logEvent('Has hundido todos los barcos enemigos. Ganaste!')
+        logEvent('¡Ganaste! Hundiste todos los barcos enemigos.');
       }
-
     } else {
-      logEvent("Miss!");
+      logEvent("Fallaste.");
       newEnemyBoard[row][col] = 'O';
+      setEnemyBoard(newEnemyBoard);
       setPlayerTurn(false);
-      logEvent(`Fallaste el disparo en la fila ${row}, columna ${col}`);
     }
-    setEnemyBoard(newEnemyBoard);
   };
 
   const computerFire = () => {
@@ -132,39 +145,16 @@ function App() {
       col = getRandomInt(10);
     } while (playerBoard[row][col] !== null && playerBoard[row][col] !== 'X' && playerBoard[row][col] !== 'O');
 
-    const newPlayerBoard = playerBoard.map((row) => [...row]);
+    const newPlayerBoard = playerBoard.map((r) => [...r]);
     if (newPlayerBoard[row][col] === 'S') {
-      logEvent(`Le dispararon a uno de tus barcos`);
+      logEvent("La computadora te dio.");
       newPlayerBoard[row][col] = 'X';
-      setPlayerTurn(true);
-      
-      // Verificacion si algun barco del jugador es hundido
-      let shipSunk = false;
-      const newPlacedShips = placedShips.map(ship => {
-        if (ship.coordinates.some(coord => coord.row === row && coord.col === col)) {
-          ship.hits += 1;
-          if (ship.hits === ship.size) {
-            logEvent(`Tu barco ${ship.name} ha sido hundido!`);
-            shipSunk = true;
-          }
-        }
-        return ship;
-      });
-      setPlacedShips(newPlacedShips);
-
-      // Verificacion si todos los barcos del jugador estan hundidos
-      const allShipsSunk = newPlacedShips.every(ship => ship.hits === ship.size);
-      if (allShipsSunk) {
-        setGameLost(true);
-        logEvent('Todos tus barcos han sido hundidos. Perdiste!')
-      }
-
     } else {
-      logEvent("No te han dado");
+      logEvent("La computadora falló.");
       newPlayerBoard[row][col] = 'O';
-      setPlayerTurn(true);
     }
     setPlayerBoard(newPlayerBoard);
+    setPlayerTurn(true);
   };
 
   const getRandomInt = (max) => {
@@ -173,8 +163,8 @@ function App() {
 
   const canPlaceShip = (board, ship, row, col, orientation) => {
     for (let i = 0; i < ship.size; i++) {
-      let x = row + (orientation === 'vertical' ? i : 0); 
-      let y = col + (orientation === 'vertical' ? 0 : i);
+      let x = row + (orientation === 'vertical' ? i : 0);
+      let y = col + (orientation === 'horizontal' ? i : 0);
       if (x >= 10 || y >= 10 || board[x][y]) {
         return false;
       }
@@ -183,7 +173,7 @@ function App() {
   };
 
   const placeShip = (board, ship, row, col, orientation) => {
-    let newBoard = board.map(row => [...row]);
+    let newBoard = board.map((r) => [...r]);
     const shipCoordinates = [];
     for (let i = 0; i < ship.size; i++) {
       let x = row + (orientation === 'vertical' ? i : 0);
@@ -191,15 +181,19 @@ function App() {
       newBoard[x][y] = 'S';
       shipCoordinates.push({ row: x, col: y });
     }
-    setPlacedShips([...placedShips, { ...ship, coordinates: shipCoordinates, hits: 0 }]);
+    setPlacedShips((prevShips) => [
+      ...prevShips,
+      { ...ship, coordinates: shipCoordinates, hits: 0 }
+    ]);
     return newBoard;
   };
+  
 
   const placeComputerShips = () => {
-    let newBoard = initialBoard.map(row => [...row]);
+    let newBoard = initialBoard.map((r) => [...r]);
     let newEnemyShips = [];
 
-    ships.forEach(ship => {
+    ships.forEach((ship) => {
       let placed = false;
       while (!placed) {
         const orientation = getRandomInt(2) === 0 ? 'horizontal' : 'vertical';
@@ -207,83 +201,79 @@ function App() {
         const col = getRandomInt(10);
         if (canPlaceShip(newBoard, ship, row, col, orientation)) {
           newBoard = placeShip(newBoard, ship, row, col, orientation);
+          newEnemyShips.push({
+            ...ship,
+            coordinates: getShipCoordinates(row, col, ship.size, orientation),
+            hits: 0
+          });
           placed = true;
-
-          const coordinates = [];
-          for (let i = 0; i < ship.size; i++) {
-            let x = row + (orientation === 'vertical' ? i : 0);
-            let y = col + (orientation === 'horizontal' ? i : 0);
-            coordinates.push({ row: x, col: y });
-          }
-          newEnemyShips.push({ ...ship, coordinates, hits: 0 });
         }
       }
     });
+
     setEnemyBoard(newBoard);
     setEnemyShips(newEnemyShips);
+  };
 
-    // Log con las coordenadas de los barcos enemigos
-    const shipCoordinates = newEnemyShips.flatMap(ship => ship.coordinates.map(coord => {
-      return `${String.fromCharCode(65 + coord.col)}${coord.row + 1}`;
-    }));
-    console.log('Coordenada de los barcos enemigos:', shipCoordinates);
+  const getShipCoordinates = (row, col, size, orientation) => {
+    const coordinates = [];
+    for (let i = 0; i < size; i++) {
+      coordinates.push({
+        row: row + (orientation === 'vertical' ? i : 0),
+        col: col + (orientation === 'horizontal' ? i : 0)
+      });
+    }
+    return coordinates;
   };
 
   return (
-    <div className="app-container">
-      <h1 className="app-title">Battleship</h1>
-      {!isSetupComplete ? (
-        <div className="content-container">
-          <div className="ship-list-container">
-            <ShipList
-              ships={ships}
-              onSelectShip={handleSelectShip}
-              orientation={orientation}
-              onRotate={handleRotate}
-              placedShips={placedShips}
-            />
-          </div>
-          <div className="board-container">
-            <Board
-              board={playerBoard}
-              onCellClick={handleCellClick}
-              setBoard={setPlayerBoard}
-              orientation={orientation}
-              placedShips={placedShips}
-              setPlacedShips={setPlacedShips}
-              isPlayerBoard={true}
-            />
-          </div>
-          <button onClick={handleCompleteSetup}>Comenzar</button>
+    <div className="App">
+      <h1>¡Bienvenido a Batalla Naval!</h1>
+      <div className="boards">
+        <div>
+          <h2>Tu Tablero</h2>
+          <Board
+            board={playerBoard}
+            onCellClick={handleCellClick}
+            isPlayerBoard={true}
+            ships={placedShips}
+          />
         </div>
-      ) : (
-        <div className="game-container">
-          <div className="board-container">
-            <h2>Tu tablero</h2>
-            <Board
-              board={playerBoard}
-              onCellClick={handleCellClick}
-              setBoard={setPlayerBoard}
-              isPlayerBoard={true}
-            />
-            <div>
-              <input
-                type="text"
-                value={fireCoordinate}
-                onChange={handleFireCoordinateChange}
-                placeholder="Ingresar coordenadas (e.g., A1)"
-                disabled={gameWon || gameLost}
-              />
-              <button onClick={handleFire} disabled={gameWon || gameLost}>Disparo</button>
-              {gameWon && <h2 style={{ color: 'black' }}>Hundiste todos los barcos enemigos</h2>}
-              {gameLost && <h2 style={{ color: 'black' }}>Tu enemigo hundio todos tus barcos</h2>}
-            </div>
-          </div>
+        <div>
+          <h2>Tablero del Enemigo</h2>
+          <Board
+            board={enemyBoard}
+            onCellClick={handleCellClick}
+            isEnemyBoard={true}
+          />
         </div>
-      )}
+      </div>
+      <div className="controls">
+        <ShipList ships={ships} onSelectShip={handleSelectShip} placedShips={placedShips} />
+        <button onClick={handleCompleteSetup}>Completar Configuración</button>
+      </div>
+      <div className="fire-controls">
+        <input
+          type="text"
+          value={fireCoordinate}
+          onChange={handleFireCoordinateChange}
+          placeholder="e.g., A1"
+          disabled={!isSetupComplete || !playerTurn || gameWon || gameLost}
+        />
+        <button onClick={() => handleFire(fireCoordinate)} disabled={!isSetupComplete || !playerTurn || gameWon || gameLost}>
+          Fuego!
+        </button>
+      </div>
+      <div className="log">
+        <h2>Registro del Juego</h2>
+        <ul>
+          {gameLog.map((log, index) => (
+            <li key={index}>{log}</li>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 }
 
 export default App;
-

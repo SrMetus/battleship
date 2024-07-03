@@ -1,86 +1,57 @@
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import Cell from './Cell';
-import './Board.css';
 
-const Board = ({ board, onCellClick, setBoard, orientation, placedShips, setPlacedShips, isPlayerBoard }) => {
-  const alphabet = 'ABCDEFGHIJ'.split('');
+const Board = ({ board, onCellClick, isPlayerBoard, isEnemyBoard, ships }) => {
+  const renderCell = (cell, rowIndex, colIndex) => {
+    let cellClass = 'cell';
+    let shipColor = null;
 
-  const [opponentBoard, setOpponentBoard] = useState(Array(10).fill(null).map(() => Array(10).fill(null)));
-
-  const handleDrop = (e, rowIndex, colIndex) => {
-    e.preventDefault();
-    //console.log("Ship data:", e.dataTransfer.getData('ship'));
-    const ship = JSON.parse(e.dataTransfer.getData('ship'));
-    //console.log("Ship:", ship);
-    let newBoard = board.map(row => [...row]);
-    //console.log("Initial board:", newBoard);
-    let canPlace = true;
-
-    for (let i = 0; i < ship.size; i++) {
-      let x = rowIndex + (orientation === 'vertical' ? i : 0);
-      let y = colIndex + (orientation === 'horizontal' ? i : 0);
-      if (x >= 10 || y >= 10 || newBoard[x][y]) {
-        canPlace = false;
-        break;
+    if (cell === 'S' && isPlayerBoard) {
+      const shipInCell = ships.find(ship => ship.coordinates.some(coord => coord.row === rowIndex && coord.col === colIndex));
+      if (shipInCell) {
+        shipColor = shipInCell.color;
       }
+      cellClass += ' ship'; // Mostrar 'S' en el tablero del jugador
+    } else if (cell === 'X' && isEnemyBoard) {
+      cellClass += ' hit'; // Mostrar acierto en el tablero enemigo
+    } else if (cell === 'O' && isEnemyBoard) {
+      cellClass += ' miss'; // Mostrar agua en el tablero enemigo
     }
 
-    if (canPlace) {
-      for (let i = 0; i < ship.size; i++) {
-        let x = rowIndex + (orientation === 'vertical' ? i : 0);
-        let y = colIndex + (orientation === 'horizontal' ? i : 0);
-        newBoard[x][y] = { ship: ship.name, color: ship.color };
-      }
-      setBoard(newBoard);
-      setPlacedShips([...placedShips, ship.name]);
+    if (shipColor) {
+      cellClass += ` ${shipColor}`; // Aplicar el color del barco si está definido
     }
+
+    return (
+      <Cell
+        key={`${rowIndex}-${colIndex}`}
+        value={cell}
+        color={shipColor}
+        onClick={() => onCellClick(rowIndex, colIndex, isEnemyBoard)}
+        isPlayerBoard={isPlayerBoard}
+        isEnemyBoard={isEnemyBoard}
+      />
+    );
   };
 
-  const handleDragOver = (e) => {
-    e.preventDefault();
-  };
-
-  const handleCellClick = (rowIndex, colIndex) => {
-    if (!isPlayerBoard) {
-      return;
-    }
-
-    if (opponentBoard[rowIndex][colIndex] !== null) {
-      return;
-    }
-
-    // Actualizacion del tablero despues de un disparo.
-    let newOpponentBoard = opponentBoard.map(row => [...row]);
-    const shotResult = board[rowIndex][colIndex] ? 'hit' : 'miss';
-    newOpponentBoard[rowIndex][colIndex] = shotResult;
-    setOpponentBoard(newOpponentBoard);
-
-    onCellClick(rowIndex, colIndex);
-  };
+  const renderCoordinateCell = (label, index) => (
+    <div key={index} className="coord-cell">
+      {label}
+    </div>
+  );
 
   return (
     <div className="board">
       <div className="board-row">
-        <div className="cell coord-cell"></div>
-        {alphabet.map((letter, index) => (
-          <div key={index} className="cell coord-cell">{letter}</div>
-        ))}
+        {renderCoordinateCell('', 'coord-empty')}
+        {Array.from({ length: 10 }, (_, colIndex) =>
+          renderCoordinateCell(String.fromCharCode(65 + colIndex), `col-${colIndex}`)
+        )}
       </div>
       {board.map((row, rowIndex) => (
         <div key={rowIndex} className="board-row">
-          <div className="cell coord-cell">{rowIndex + 1}</div>
-          {row.map((cell, colIndex) => (
-            <Cell
-              key={colIndex}
-              value={cell ? cell.ship : null}
-              color={cell ? cell.color : null}
-              onClick={() => handleCellClick(rowIndex, colIndex)}
-              onDrop={(e) => handleDrop(e, rowIndex, colIndex)}
-              onDragOver={handleDragOver}
-              isPlayerBoard={isPlayerBoard}
-              shotResult={isPlayerBoard ? opponentBoard[rowIndex][colIndex] : null}
-            />
-          ))}
+          {renderCoordinateCell(rowIndex + 1, `row-${rowIndex}`)}
+          {row.map((cell, colIndex) => renderCell(cell, rowIndex, colIndex))}
         </div>
       ))}
     </div>
