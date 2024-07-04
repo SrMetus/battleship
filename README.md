@@ -1,18 +1,66 @@
 # Battleship Game
 
-## Instrucciones
+## Descripción
 
-1. Arrastra el nombre del barco a tu tablero.
-2. Puedes modificar la orientacion del barco aprentando R.
-3. Cuando todos los barcos esten en tu tablero puedes comenzar el juego.
-4. Deber colocar una coordenada valida para disparar.
-5. Espera el turno de tu enemigo.
-6. Vuelve a realizar el mismo proceso hasta hundir todos los barcos del enemigo.
+El juego de Battleship es una adaptación del clásico juego de estrategia naval, donde los jugadores intentan hundir los barcos del oponente colocando disparos en un tablero de juego. Este proyecto está desarrollado utilizando React y CSS para la interfaz de usuario, y emplea una lógica de juego implementada en JavaScript.
 
-## Explicación
+## Tecnologías Utilizadas
 
-Para poder cambiar orientacion del barco debes apretar R antes de arrastrar el barco al tablero.
-Si se coloca una coordenada que esta fuera del tablero o que ya allas realizado un disparo te pedira que ingreses una coordenada nueva.
-Coloque en consola las coordenadas de los barcos enemigos para probar la funcionalidad de disparo.
-Al hundir un barco te dira el nombre del barco hundido.
-Al hundir todos los barcos el juego indicara que hundiste todos los barcos y que has ganado.
+- **Frontend**: React, JavaScript
+- **Estilos**: CSS
+
+## Instalación
+
+1. **Clona el repositorio**:
+    ```bash
+   git clone https://github.com/SrMetus/battleship.git
+
+2. **Instala las dependencias**:
+
+    ```bash
+    cd battleship-game
+    npm install
+
+3. **Inicia la aplicación**:
+
+    ```bash
+    npm start
+
+## Cómo Jugar
+### Coloca tus barcos:
+
+- Arrastra el nombre del barco a tu tablero.
+- Puedes cambiar la orientación del barco presionando la tecla R.
+
+### Realiza tus disparos:
+
+- Ingresa una coordenada válida para disparar.
+- Si eliges una coordenada fuera del tablero o ya has disparado allí, se te pedirá ingresar una nueva coordenada.
+
+### Observa el estado del juego:
+1. Se mostrara tu dispara y el disparo del enemigo en los tableros respectivamente.
+2. En el registro del juego se indicara si tu disparo o el del enemigo han acertado o no
+3. Se mostrará un mensaje cuando un barco sea hundido.
+4. Al hundir todos los barcos del enemigo, se indicará que has ganado el juego.
+
+## Estructura del Proyecto
+battleship-game/  
+│  
+├── src/  
+│   ├── components/  
+│   │   ├── Board.js  
+│   │   ├── Cell.js  
+│   │   └── ...  
+│   ├── styles/  
+│   │   ├── App.css  
+│   │   └── Board.css  
+│   ├── App.js  
+│   └── index.js  
+│  
+├── public/  
+│   └── index.html  
+│  
+└── package.json  
+
+## Contribuir
+¡Las contribuciones son bienvenidas! Si deseas mejorar el juego.
