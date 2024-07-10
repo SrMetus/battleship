@@ -42,6 +42,7 @@ El juego de Battleship es una adaptación del clásico juego de estrategia naval
 2. En el registro del juego se indicara si tu disparo o el del enemigo han acertado o no
 3. Se mostrará un mensaje cuando un barco sea hundido.
 4. Al hundir todos los barcos del enemigo, se indicará que has ganado el juego.
+5. Se actualizará dinámicamente el estado del juego conforme se realicen los disparos y se hundan los barcos.
 
 ## Estructura del Proyecto
 battleship-game/  
