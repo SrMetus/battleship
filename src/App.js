@@ -89,30 +89,26 @@ function App() {
   };
 
   const handleFire = (fireCoordinate) => {
-    // Convertir la coordenada de fuego (ej. A1) a índices de matriz (ej. row = 0, col = 0)
     const [colChar, rowStr] = fireCoordinate.toUpperCase().split('');
     const col = colChar.charCodeAt(0) - 'A'.charCodeAt(0);
     const row = parseInt(rowStr, 10) - 1;
-
-    // Verificar si la coordenada es válida
+  
     if (isNaN(row) || row < 0 || row >= 10 || isNaN(col) || col < 0 || col >= 10) {
       logEvent("Coordenada de fuego inválida. Por favor ingrese una coordenada válida (ej. A1).");
       return;
     }
-
-    // Verificar si ya se ha disparado en esta ubicación
+  
     if (enemyBoard[row][col] !== null && enemyBoard[row][col] !== 'S') {
       logEvent("Ya has disparado en esta ubicación. Por favor elige otra.");
       return;
     }
-
+  
     const newEnemyBoard = enemyBoard.map((r) => [...r]);
     if (newEnemyBoard[row][col] === 'S') {
       logEvent("¡Le diste a un barco enemigo!");
       newEnemyBoard[row][col] = 'X';
       setEnemyBoard(newEnemyBoard);
-
-      // Lógica para verificar si un barco ha sido hundido
+  
       let shipSunk = false;
       const newEnemyShips = enemyShips.map((ship) => {
         if (ship.coordinates.some((coord) => coord.row === row && coord.col === col)) {
@@ -125,7 +121,7 @@ function App() {
         return ship;
       });
       setEnemyShips(newEnemyShips);
-
+  
       if (newEnemyShips.every((ship) => ship.hits === ship.size)) {
         setGameWon(true);
         logEvent('¡Ganaste! Hundiste todos los barcos enemigos.');
@@ -136,22 +132,22 @@ function App() {
       setEnemyBoard(newEnemyBoard);
       setPlayerTurn(false);
     }
-  };
+  };  
 
   const computerFire = () => {
     let row, col;
     do {
       row = getRandomInt(10);
       col = getRandomInt(10);
-    } while (playerBoard[row][col] !== null && playerBoard[row][col] !== 'X' && playerBoard[row][col] !== 'O');
-
+    } while (playerBoard[row][col] !== null && playerBoard[row][col] !== 'S');
+  
     const newPlayerBoard = playerBoard.map((r) => [...r]);
     if (newPlayerBoard[row][col] === 'S') {
       logEvent("La computadora te dio.");
-      newPlayerBoard[row][col] = 'X';
+      newPlayerBoard[row][col] = 'X'; // Marcar acierto
     } else {
       logEvent("La computadora falló.");
-      newPlayerBoard[row][col] = 'O';
+      newPlayerBoard[row][col] = 'O'; // Marcar fallo
     }
     setPlayerBoard(newPlayerBoard);
     setPlayerTurn(true);

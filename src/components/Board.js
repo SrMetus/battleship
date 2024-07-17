@@ -11,15 +11,15 @@ const Board = ({ board, onCellClick, isPlayerBoard, isEnemyBoard, ships }) => {
       if (shipInCell) {
         shipColor = shipInCell.color;
       }
-      cellClass += ' ship'; // Mostrar 'S' en el tablero del jugador
-    } else if (cell === 'X' && isEnemyBoard) {
-      cellClass += ' hit'; // Mostrar acierto en el tablero enemigo
-    } else if (cell === 'O' && isEnemyBoard) {
-      cellClass += ' miss'; // Mostrar agua en el tablero enemigo
+      cellClass += ' ship';
+    } else if (cell === 'X') {
+      cellClass += ' hit';
+    } else if (cell === 'O') {
+      cellClass += ' miss';
     }
 
     if (shipColor) {
-      cellClass += ` ${shipColor}`; // Aplicar el color del barco si está definido
+      cellClass += ` ${shipColor}`;
     }
 
     return (
@@ -57,5 +57,6 @@ const Board = ({ board, onCellClick, isPlayerBoard, isEnemyBoard, ships }) => {
     </div>
   );
 };
+
 
 export default Board;
